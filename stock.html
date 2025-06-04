@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gestión de Stock</title>
-  <link rel="stylesheet" href="styles/stock.css">
+  <link rel="stylesheet" href="../Teka/styles/stock.css">
 </head>
 <body>
   <header>
-    <button onclick="window.location.href='index.html'">⬅ Volver</button>
+    <button onclick="window.location.href='teka.html'">⬅ Volver</button>
     <button onclick="location.href='login.html'" class="btnCerrarSesion">Cerrar sesión</button>
     <h1>Gestión de Stock</h1>
   </header>
@@ -28,7 +28,7 @@
     </div>
     <input type="hidden" id="tipoSeleccionado" value="Producto">
 
-    <form onsubmit="guardar(event)">
+    <form id="formularioGuardar">
       <div id="camposComunes">
         <input type="text" id="codigoNuevo" placeholder="Código" required>
         <input type="number" id="stockActual" placeholder="Stock actual" required>
@@ -36,31 +36,65 @@
       </div>
 
       <div id="camposProducto">
-        <select id="rubroNuevo" onchange="actualizarSubrubros()" required>
+        <select id="rubroNuevo" required>
           <option value="">Seleccione un rubro</option>
-          <option value="Alimentos">Alimentos</option>
-          <option value="Tecnología">Tecnología</option>
-          <option value="Textil">Textil</option>
-          <option value="Servicios">Servicios</option>
+          <option value="Alimentos">Muebles para el hogar</option>
+          <option value="Tecnología">Muebles de Oficina</option>
+          <option value="Textil">Muebles de Comedor</option>
+          <option value="Servicios">Muebles de Dormitorio</option>
         </select>
 
-        <select id="subrubroNuevo" required>
-          <option value="">Seleccione un subrubro</option>
+        <select id="productoNuevo" required>
+          <option value="">Seleccione un producto</option>
+          <option value="Rack de TV">Rack de TV</option>
+          <option value="Mesa ratona">Mesa ratona</option>
+          <option value="Vajillero">Vajillero</option>
+          <option value="Mesa de comedor">Mesa de comedor</option>
+          <option value="Mesa de luz">Mesa de luz</option>
         </select>
 
-        <input type="text" id="productoNuevo" placeholder="Producto" required>
         <input type="text" id="colorProducto" placeholder="Color" required>
         <input type="text" id="tamanoProducto" placeholder="Tamaño" required>
       </div>
 
       <div id="camposInsumo" style="display:none;">
-        <input type="text" id="tipoInsumo" placeholder="Tipo">
-        <input type="text" id="insumoNuevo" placeholder="Insumo">
+        <select id="tipoInsumo" required>
+          <option value="">Seleccione tipo</option>
+          <option value="madera">madera</option>
+          <option value="herrajes">herrajes</option>
+          <option value="pintura">pintura</option>
+          <option value="tapicería">tapicería</option>
+          <option value="embalaje">embalaje</option>
+          <option value="limpieza">limpieza</option>
+          <option value="oficina">oficina</option>
+        </select>
+
+        <select id="insumoNuevo" required>
+          <option value="">Seleccione un insumo</option>
+          <option value="melamina">melamina</option>
+          <option value="MDF">MDF</option>
+          <option value="pino finger">pino finger</option>
+          <option value="aglomerado">aglomerado</option>
+          <option value="bisagra reforzada">bisagra reforzada</option>
+          <option value="corredera simple">corredera simple</option>
+          <option value="tornillo de madera">tornillo de madera</option>
+          <option value="minifix">minifix</option>
+          <option value="laca pu">laca pu</option>
+          <option value="barniz sintético">barniz sintético</option>
+          <option value="cola vinílica">cola vinílica</option>
+          <option value="tela lona">tela lona</option>
+          <option value="espuma alta dens.">espuma alta dens.</option>
+          <option value="grampas tapicero">grampas tapicero</option>
+          <option value="film stretch">film stretch</option>
+          <option value="cinta embalar">cinta embalar</option>
+        </select>
+
         <input type="text" id="colorInsumo" placeholder="Color">
         <input type="text" id="tamanoInsumo" placeholder="Tamaño">
       </div>
 
       <button type="submit">Guardar</button>
+      <p id="mensajeGuardar"></p> <!-- AÑADIDO -->
     </form>
   </section>
 
@@ -73,7 +107,6 @@
           <th>Tipo</th>
           <th>Código</th>
           <th>Rubro</th>
-          <th>Subrubro</th>
           <th>Nombre</th>
           <th>Color</th>
           <th>Tamaño</th>
@@ -114,6 +147,7 @@
     <p id="mensajeMovimiento"></p>
   </section>
 
+  <!-- Sección stock crítico -->
   <section id="bajo-stock">
     <table>
       <thead>
@@ -130,27 +164,6 @@
   </section>
 
   <script>
-    const subrubrosPorRubro = {
-      "Alimentos": ["Lácteos", "Panificados", "Snacks"],
-      "Tecnología": ["Informática", "Telefonía", "Electrónica"],
-      "Textil": ["Indumentaria", "Calzado", "Accesorios"],
-      "Servicios": ["Mantenimiento", "Consultoría", "Logística"]
-    };
-
-    function actualizarSubrubros() {
-      const rubro = document.getElementById("rubroNuevo").value;
-      const subrubroSelect = document.getElementById("subrubroNuevo");
-      subrubroSelect.innerHTML = '<option value="">Seleccione un subrubro</option>';
-      if (subrubrosPorRubro[rubro]) {
-        subrubrosPorRubro[rubro].forEach(sub => {
-          const option = document.createElement("option");
-          option.value = sub;
-          option.textContent = sub;
-          subrubroSelect.appendChild(option);
-        });
-      }
-    }
-
     function seleccionarTipo(tipo) {
       document.getElementById('tipoSeleccionado').value = tipo;
 
@@ -166,6 +179,8 @@
 
     function guardar(e) {
       e.preventDefault();
+      console.log("Función guardar ejecutada"); // Para depurar
+
       const tipo = document.getElementById('tipoSeleccionado').value;
       const codigo = document.getElementById('codigoNuevo').value.trim();
       const stockActual = parseInt(document.getElementById('stockActual').value);
@@ -175,13 +190,15 @@
 
       if (tipo === 'Producto') {
         nuevo.rubro = document.getElementById('rubroNuevo').value;
-        nuevo.subrubro = document.getElementById('subrubroNuevo').value;
+        nuevo.subrubro = '';
         nuevo.producto = document.getElementById('productoNuevo').value.trim();
         nuevo.color = document.getElementById('colorProducto').value.trim();
         nuevo.tamano = document.getElementById('tamanoProducto').value.trim();
       } else {
-        nuevo.tipoInsumo = document.getElementById('tipoInsumo').value.trim();
+        nuevo.rubro = '';
+        nuevo.subrubro = '';
         nuevo.insumo = document.getElementById('insumoNuevo').value.trim();
+        nuevo.tipoInsumo = document.getElementById('tipoInsumo').value.trim();
         nuevo.color = document.getElementById('colorInsumo').value.trim();
         nuevo.tamano = document.getElementById('tamanoInsumo').value.trim();
       }
@@ -189,238 +206,60 @@
       const lista = JSON.parse(localStorage.getItem('stock')) || [];
       lista.push(nuevo);
       localStorage.setItem('stock', JSON.stringify(lista));
-      alert("Guardado correctamente");
-      e.target.reset();
-      actualizarSubrubros(); // Resetear subrubros
+
+      mostrarMensajeGuardar("Guardado correctamente", false);
+      document.getElementById('formularioGuardar').reset();
+      seleccionarTipo(tipo);
+      mostrarSeccion('listado-stock');
+      cargarListado();
+    }
+
+    function mostrarMensajeGuardar(msg, esError) {
+      const p = document.getElementById('mensajeGuardar');
+      p.textContent = msg;
+      p.style.color = esError ? 'red' : 'green';
+      setTimeout(() => { p.textContent = ''; }, 3000);
     }
 
     function mostrarSeccion(id) {
-      // Quitar active de todas las secciones
       document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
-      // Poner active en la que corresponde
       document.getElementById(id).classList.add('active');
-
-      // Quitar active de todos los botones nav
-      document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
-      // Poner active al botón con data-id igual a id
-      const btn = [...document.querySelectorAll('nav button')].find(btn => btn.getAttribute('data-id') === id);
-      if (btn) btn.classList.add('active');
-
-      // Cargar datos según sección
-      if (id === 'listado-stock') cargarListado();
-      if (id === 'bajo-stock') cargarBajoStock();
     }
 
     function cargarListado() {
-      const tbody = document.getElementById('tablaStock');
-      tbody.innerHTML = '';
-      const lista = JSON.parse(localStorage.getItem('stock')) || [];
+      const listaStock = JSON.parse(localStorage.getItem('stock')) || [];
+      const tablaStock = document.getElementById('tablaStock');
+      tablaStock.innerHTML = '';
 
-      lista.forEach((item, index) => {
-        const tr = document.createElement('tr');
-
-        tr.innerHTML = `
+      listaStock.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
           <td>${item.tipo}</td>
           <td>${item.codigo}</td>
-          <td>${item.rubro || '-'}</td>
-          <td>${item.subrubro || '-'}</td>
-          <td>${item.tipo === 'Producto' ? item.producto : item.insumo}</td>
-          <td>${item.color || ''}</td>
-          <td>${item.tamano || ''}</td>
+          <td>${item.rubro || item.tipoInsumo}</td>
+          <td>${item.producto || item.insumo}</td>
+          <td>${item.color}</td>
+          <td>${item.tamano}</td>
           <td>${item.stockActual}</td>
           <td>${item.stockMinimo}</td>
-          <td>
-            <button onclick="editarFila(${index})">Editar</button>
-          </td>
+          <td><button onclick="eliminarProducto('${item.codigo}')">Eliminar</button></td>
         `;
-
-        tbody.appendChild(tr);
+        tablaStock.appendChild(row);
       });
     }
 
-    function editarFila(index) {
-      const lista = JSON.parse(localStorage.getItem('stock')) || [];
-      const tbody = document.getElementById('tablaStock');
-      tbody.innerHTML = '';
-
-      lista.forEach((item, i) => {
-        const tr = document.createElement('tr');
-        if (i === index) {
-          // Fila en modo edición
-          tr.innerHTML = `
-            <td>${item.tipo}</td>
-            <td><input type="text" id="codigo-${i}" value="${item.codigo}"></td>
-            <td><input type="text" id="rubro-${i}" value="${item.rubro || ''}"></td>
-            <td><input type="text" id="subrubro-${i}" value="${item.subrubro || ''}"></td>
-            <td><input type="text" id="nombre-${i}" value="${item.tipo === 'Producto' ? item.producto : item.insumo}"></td>
-            <td><input type="text" id="color-${i}" value="${item.color || ''}"></td>
-            <td><input type="text" id="tamano-${i}" value="${item.tamano || ''}"></td>
-            <td><input type="number" id="stockActual-${i}" value="${item.stockActual}"></td>
-            <td><input type="number" id="stockMinimo-${i}" value="${item.stockMinimo}"></td>
-            <td>
-              <button onclick="guardarEdicion(${i})">Guardar</button>
-              <button onclick="cancelarEdicion()">Cancelar</button>
-            </td>
-          `;
-        } else {
-          // Fila normal, solo lectura
-          tr.innerHTML = `
-            <td>${item.tipo}</td>
-            <td>${item.codigo}</td>
-            <td>${item.rubro || '-'}</td>
-            <td>${item.subrubro || '-'}</td>
-            <td>${item.tipo === 'Producto' ? item.producto : item.insumo}</td>
-            <td>${item.color || ''}</td>
-            <td>${item.tamano || ''}</td>
-            <td>${item.stockActual}</td>
-            <td>${item.stockMinimo}</td>
-            <td>
-              <button onclick="editarFila(${i})">Editar</button>
-            </td>
-          `;
-        }
-        tbody.appendChild(tr);
-      });
-    }
-
-    function guardarEdicion(index) {
-      const lista = JSON.parse(localStorage.getItem('stock')) || [];
-
-      const codigo = document.getElementById(`codigo-${index}`).value.trim();
-      const rubro = document.getElementById(`rubro-${index}`).value.trim();
-      const subrubro = document.getElementById(`subrubro-${index}`).value.trim();
-      const nombre = document.getElementById(`nombre-${index}`).value.trim();
-      const color = document.getElementById(`color-${index}`).value.trim();
-      const tamano = document.getElementById(`tamano-${index}`).value.trim();
-      const stockActual = parseInt(document.getElementById(`stockActual-${index}`).value);
-      const stockMinimo = parseInt(document.getElementById(`stockMinimo-${index}`).value);
-
-      if (!codigo || isNaN(stockActual) || isNaN(stockMinimo)) {
-        alert('Completa correctamente los campos obligatorios.');
-        return;
-      }
-
-      // Actualizar el objeto
-      lista[index].codigo = codigo;
-      lista[index].rubro = rubro;
-      lista[index].subrubro = subrubro;
-      lista[index].color = color;
-      lista[index].tamano = tamano;
-      lista[index].stockActual = stockActual;
-      lista[index].stockMinimo = stockMinimo;
-
-      if (lista[index].tipo === 'Producto') {
-        lista[index].producto = nombre;
-      } else {
-        lista[index].insumo = nombre;
-      }
-
-      localStorage.setItem('stock', JSON.stringify(lista));
+    function eliminarProducto(codigo) {
+      let listaStock = JSON.parse(localStorage.getItem('stock')) || [];
+      listaStock = listaStock.filter(item => item.codigo !== codigo);
+      localStorage.setItem('stock', JSON.stringify(listaStock));
       cargarListado();
     }
 
-    function cancelarEdicion() {
+    // Asignar evento al cargar DOM
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('formularioGuardar').addEventListener('submit', guardar);
       cargarListado();
-    }
-
-    function cargarBajoStock() {
-      const tbody = document.getElementById('tablaBajoStock');
-      tbody.innerHTML = '';
-      const lista = JSON.parse(localStorage.getItem('stock')) || [];
-
-      lista.filter(item => item.stockActual < item.stockMinimo)
-        .forEach(item => {
-          const tr = document.createElement('tr');
-          const nombre = item.tipo === 'Producto' ? item.producto : item.insumo;
-          tr.innerHTML = `
-            <td>${item.tipo}</td>
-            <td>${item.codigo}</td>
-            <td>${nombre}</td>
-            <td>${item.stockActual}</td>
-            <td>${item.stockMinimo}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-    }
-
-    // Función para registrar movimiento y actualizar stock
-    function registrarMovimiento(e) {
-      e.preventDefault();
-
-      const fechaISO = document.getElementById('fechaMovimiento').value; // yyyy-mm-dd
-      if (!fechaISO) {
-        mostrarMensajeMovimiento('Por favor, ingrese una fecha válida.', true);
-        return;
-      }
-      const [year, month, day] = fechaISO.split('-');
-      const fecha = `${day}/${month}/${year}`;
-
-      const motivo = document.getElementById('motivoMovimiento').value;
-      const codigo = document.getElementById('codigoMovimiento').value.trim();
-      const cantidad = parseInt(document.getElementById('cantidadMovimiento').value);
-
-      if (!motivo) {
-        mostrarMensajeMovimiento('Por favor, seleccione un motivo.', true);
-        return;
-      }
-      if (!codigo) {
-        mostrarMensajeMovimiento('Por favor, ingrese un código válido.', true);
-        return;
-      }
-      if (isNaN(cantidad) || cantidad === 0) {
-        mostrarMensajeMovimiento('Ingrese una cantidad distinta de cero.', true);
-        return;
-      }
-
-      let lista = JSON.parse(localStorage.getItem('stock')) || [];
-      const index = lista.findIndex(item => item.codigo === codigo);
-
-      if (index === -1) {
-        mostrarMensajeMovimiento('No se encontró producto o insumo con ese código.', true);
-        return;
-      }
-
-      // Actualizar stock según motivo
-      if (motivo === 'Ingreso por compra' || motivo === 'Devolución') {
-        lista[index].stockActual += cantidad;
-      } else if (motivo === 'Venta' || motivo === 'Ajuste de stock') {
-        lista[index].stockActual -= cantidad;
-      } else if (motivo === 'Otros') {
-        // Asumimos cantidad positiva = ingreso, negativa = salida (esto puede ajustarse)
-        lista[index].stockActual += cantidad;
-      }
-
-      if (lista[index].stockActual < 0) {
-        mostrarMensajeMovimiento('El stock no puede quedar negativo.', true);
-        return;
-      }
-
-      // Guardar movimientos (si querés almacenar movimientos, lo podés hacer aquí)
-      // Por ahora solo actualizamos el stock
-
-      localStorage.setItem('stock', JSON.stringify(lista));
-
-      mostrarMensajeMovimiento('Movimiento registrado y stock actualizado correctamente.', false);
-      e.target.reset();
-
-      // Si está visible el listado, actualizarlo
-      if (document.getElementById('listado-stock').classList.contains('active')) {
-        cargarListado();
-      }
-      if (document.getElementById('bajo-stock').classList.contains('active')) {
-        cargarBajoStock();
-      }
-    }
-
-    function mostrarMensajeMovimiento(msg, esError) {
-      const p = document.getElementById('mensajeMovimiento');
-      p.textContent = msg;
-      p.style.color = esError ? 'red' : 'green';
-    }
-
-    // Inicializar subrubros con el valor predeterminado
-    actualizarSubrubros();
-
+    });
   </script>
 </body>
 </html>
