@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="styles/login.css">
+</head>
+<body>
+
+  <form onsubmit="login(); return false;">
+    <h2>Iniciar sesión</h2>
+
+    <div>
+      <label for="usuario">Usuario</label>
+      <input type="text" id="usuario" placeholder="Usuario">
+    </div>
+
+    <div>
+      <label for="clave">Contraseña</label>
+      <input type="password" id="clave" placeholder="Contraseña">
+      <div class="mostrar-clave">
+        <input type="checkbox" id="verClave" onclick="togglePassword()">
+        <label for="verClave">Mostrar contraseña</label>
+      </div>
+    </div>
+
+    <button type="submit">Ingresar</button>
+    <p id="error"></p>
+  </form>
+
+  <script>
+    function login() {
+      const usuario = document.getElementById('usuario').value.trim();
+      const clave = document.getElementById('clave').value;
+      const error = document.getElementById('error');
+
+      error.textContent = '';
+
+      if (!usuario || !clave) {
+        error.textContent = 'Completá ambos campos';
+        return;
+      }
+
+      if (usuario === 'teka' && clave === 'teka') {
+        window.location.href = 'index.html';
+      } else {
+        error.textContent = 'Usuario o contraseña incorrectos';
+      }
+    }
+
+    function togglePassword() {
+      const campoClave = document.getElementById('clave');
+      campoClave.type = campoClave.type === 'password' ? 'text' : 'password';
+    }
+  </script>
+
+</body>
+</html>

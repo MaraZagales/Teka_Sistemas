@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestión de Stock</title>
+  <link rel="stylesheet" href="styles/stock.css">
+</head>
+<body>
+  <header>
+    <button onclick="window.location.href='index.html'">⬅ Volver</button>
+    <button onclick="location.href='login.html'" class="btnCerrarSesion">Cerrar sesión</button>
+    <h1>Gestión de Stock</h1>
+  </header>
+
+  <nav>
+    <button data-id="productos-insumos" onclick="mostrarSeccion('productos-insumos')" class="active">➕ Productos e Insumos</button>
+    <button data-id="movimientos-stock" onclick="mostrarSeccion('movimientos-stock')">📦 Movimientos de Stock</button>
+    <button data-id="listado-stock" onclick="mostrarSeccion('listado-stock')">📋 Listados de Stock</button>
+    <button data-id="bajo-stock" onclick="mostrarSeccion('bajo-stock')">🚨 Stock crítico</button>
+  </nav>
+
+  <!-- Sección productos e insumos -->
+  <section id="productos-insumos" class="active">
+    <div class="selector-tipo">
+      <button type="button" class="btnTipo active" onclick="seleccionarTipo('Producto')">Producto</button>
+      <button type="button" class="btnTipo" onclick="seleccionarTipo('Insumo')">Insumo</button>
+    </div>
+    <input type="hidden" id="tipoSeleccionado" value="Producto">
+
+    <form onsubmit="guardar(event)">
+      <div id="camposComunes">
+        <input type="text" id="codigoNuevo" placeholder="Código" required>
+        <input type="number" id="stockActual" placeholder="Stock actual" required>
+        <input type="number" id="stockMinimo" placeholder="Stock mínimo" required>
+      </div>
+
+      <div id="camposProducto">
+        <select id="rubroNuevo" onchange="actualizarSubrubros()" required>
+          <option value="">Seleccione un rubro</option>
+          <option value="Alimentos">Alimentos</option>
+          <option value="Tecnología">Tecnología</option>
+          <option value="Textil">Textil</option>
+          <option value="Servicios">Servicios</option>
+        </select>
+
+        <select id="subrubroNuevo" required>
+          <option value="">Seleccione un subrubro</option>
+        </select>
+
+        <input type="text" id="productoNuevo" placeholder="Producto" required>
+        <input type="text" id="colorProducto" placeholder="Color" required>
+        <input type="text" id="tamanoProducto" placeholder="Tamaño" required>
+      </div>
+
+      <div id="camposInsumo" style="display:none;">
+        <input type="text" id="tipoInsumo" placeholder="Tipo">
+        <input type="text" id="insumoNuevo" placeholder="Insumo">
+        <input type="text" id="colorInsumo" placeholder="Color">
+        <input type="text" id="tamanoInsumo" placeholder="Tamaño">
+      </div>
+
+      <button type="submit">Guardar</button>
+    </form>
+  </section>
+
+  <!-- Sección listado de stock -->
+  <section id="listado-stock">
+    <h2>📋 Listado de Stock</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Código</th>
+          <th>Rubro</th>
+          <th>Subrubro</th>
+          <th>Nombre</th>
+          <th>Color</th>
+          <th>Tamaño</th>
+          <th>Stock Actual</th>
+          <th>Stock Mínimo</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tablaStock"></tbody>
+    </table>
+  </section>
+
+  <!-- Sección movimientos de stock -->
+  <section id="movimientos-stock">
+    <h2>📦 Movimientos de Stock</h2>
+    <form id="formMovimiento" onsubmit="registrarMovimiento(event)">
+      <label for="fechaMovimiento">Fecha:</label>
+      <input type="date" id="fechaMovimiento" required>
+
+      <label for="motivoMovimiento">Motivo del movimiento:</label>
+      <select id="motivoMovimiento" required>
+        <option value="">Seleccione un motivo</option>
+        <option value="Ingreso por compra">Ingreso por compra</option>
+        <option value="Venta">Venta</option>
+        <option value="Devolución">Devolución</option>
+        <option value="Ajuste de stock">Ajuste de stock</option>
+        <option value="Otros">Otros</option>
+      </select>
+
+      <label for="codigoMovimiento">Código del producto/insumo:</label>
+      <input type="text" id="codigoMovimiento" placeholder="Código" required>
+
+      <label for="cantidadMovimiento">Cantidad:</label>
+      <input type="number" id="cantidadMovimiento" placeholder="Cantidad" required>
+
+      <button type="submit">Registrar movimiento</button>
+    </form>
+    <p id="mensajeMovimiento"></p>
+  </section>
+
+  <section id="bajo-stock">
+    <table>
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Stock Actual</th>
+          <th>Stock Mínimo</th>
+        </tr>
+      </thead>
+      <tbody id="tablaBajoStock"></tbody>
+    </table>
+  </section>
+
+  <script>
+    const subrubrosPorRubro = {
+      "Alimentos": ["Lácteos", "Panificados", "Snacks"],
+      "Tecnología": ["Informática", "Telefonía", "Electrónica"],
+      "Textil": ["Indumentaria", "Calzado", "Accesorios"],
+      "Servicios": ["Mantenimiento", "Consultoría", "Logística"]
+    };
+
+    function actualizarSubrubros() {
+      const rubro = document.getElementById("rubroNuevo").value;
+      const subrubroSelect = document.getElementById("subrubroNuevo");
+      subrubroSelect.innerHTML = '<option value="">Seleccione un subrubro</option>';
+      if (subrubrosPorRubro[rubro]) {
+        subrubrosPorRubro[rubro].forEach(sub => {
+          const option = document.createElement("option");
+          option.value = sub;
+          option.textContent = sub;
+          subrubroSelect.appendChild(option);
+        });
+      }
+    }
+
+    function seleccionarTipo(tipo) {
+      document.getElementById('tipoSeleccionado').value = tipo;
+
+      const botones = document.querySelectorAll('.btnTipo');
+      botones.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent === tipo) btn.classList.add('active');
+      });
+
+      document.getElementById('camposProducto').style.display = tipo === 'Producto' ? 'block' : 'none';
+      document.getElementById('camposInsumo').style.display = tipo === 'Insumo' ? 'block' : 'none';
+    }
+
+    function guardar(e) {
+      e.preventDefault();
+      const tipo = document.getElementById('tipoSeleccionado').value;
+      const codigo = document.getElementById('codigoNuevo').value.trim();
+      const stockActual = parseInt(document.getElementById('stockActual').value);
+      const stockMinimo = parseInt(document.getElementById('stockMinimo').value);
+
+      let nuevo = { tipo, codigo, stockActual, stockMinimo };
+
+      if (tipo === 'Producto') {
+        nuevo.rubro = document.getElementById('rubroNuevo').value;
+        nuevo.subrubro = document.getElementById('subrubroNuevo').value;
+        nuevo.producto = document.getElementById('productoNuevo').value.trim();
+        nuevo.color = document.getElementById('colorProducto').value.trim();
+        nuevo.tamano = document.getElementById('tamanoProducto').value.trim();
+      } else {
+        nuevo.tipoInsumo = document.getElementById('tipoInsumo').value.trim();
+        nuevo.insumo = document.getElementById('insumoNuevo').value.trim();
+        nuevo.color = document.getElementById('colorInsumo').value.trim();
+        nuevo.tamano = document.getElementById('tamanoInsumo').value.trim();
+      }
+
+      const lista = JSON.parse(localStorage.getItem('stock')) || [];
+      lista.push(nuevo);
+      localStorage.setItem('stock', JSON.stringify(lista));
+      alert("Guardado correctamente");
+      e.target.reset();
+      actualizarSubrubros(); // Resetear subrubros
+    }
+
+    function mostrarSeccion(id) {
+      // Quitar active de todas las secciones
+      document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+      // Poner active en la que corresponde
+      document.getElementById(id).classList.add('active');
+
+      // Quitar active de todos los botones nav
+      document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+      // Poner active al botón con data-id igual a id
+      const btn = [...document.querySelectorAll('nav button')].find(btn => btn.getAttribute('data-id') === id);
+      if (btn) btn.classList.add('active');
+
+      // Cargar datos según sección
+      if (id === 'listado-stock') cargarListado();
+      if (id === 'bajo-stock') cargarBajoStock();
+    }
+
+    function cargarListado() {
+      const tbody = document.getElementById('tablaStock');
+      tbody.innerHTML = '';
+      const lista = JSON.parse(localStorage.getItem('stock')) || [];
+
+      lista.forEach((item, index) => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+          <td>${item.tipo}</td>
+          <td>${item.codigo}</td>
+          <td>${item.rubro || '-'}</td>
+          <td>${item.subrubro || '-'}</td>
+          <td>${item.tipo === 'Producto' ? item.producto : item.insumo}</td>
+          <td>${item.color || ''}</td>
+          <td>${item.tamano || ''}</td>
+          <td>${item.stockActual}</td>
+          <td>${item.stockMinimo}</td>
+          <td>
+            <button onclick="editarFila(${index})">Editar</button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function editarFila(index) {
+      const lista = JSON.parse(localStorage.getItem('stock')) || [];
+      const tbody = document.getElementById('tablaStock');
+      tbody.innerHTML = '';
+
+      lista.forEach((item, i) => {
+        const tr = document.createElement('tr');
+        if (i === index) {
+          // Fila en modo edición
+          tr.innerHTML = `
+            <td>${item.tipo}</td>
+            <td><input type="text" id="codigo-${i}" value="${item.codigo}"></td>
+            <td><input type="text" id="rubro-${i}" value="${item.rubro || ''}"></td>
+            <td><input type="text" id="subrubro-${i}" value="${item.subrubro || ''}"></td>
+            <td><input type="text" id="nombre-${i}" value="${item.tipo === 'Producto' ? item.producto : item.insumo}"></td>
+            <td><input type="text" id="color-${i}" value="${item.color || ''}"></td>
+            <td><input type="text" id="tamano-${i}" value="${item.tamano || ''}"></td>
+            <td><input type="number" id="stockActual-${i}" value="${item.stockActual}"></td>
+            <td><input type="number" id="stockMinimo-${i}" value="${item.stockMinimo}"></td>
+            <td>
+              <button onclick="guardarEdicion(${i})">Guardar</button>
+              <button onclick="cancelarEdicion()">Cancelar</button>
+            </td>
+          `;
+        } else {
+          // Fila normal, solo lectura
+          tr.innerHTML = `
+            <td>${item.tipo}</td>
+            <td>${item.codigo}</td>
+            <td>${item.rubro || '-'}</td>
+            <td>${item.subrubro || '-'}</td>
+            <td>${item.tipo === 'Producto' ? item.producto : item.insumo}</td>
+            <td>${item.color || ''}</td>
+            <td>${item.tamano || ''}</td>
+            <td>${item.stockActual}</td>
+            <td>${item.stockMinimo}</td>
+            <td>
+              <button onclick="editarFila(${i})">Editar</button>
+            </td>
+          `;
+        }
+        tbody.appendChild(tr);
+      });
+    }
+
+    function guardarEdicion(index) {
+      const lista = JSON.parse(localStorage.getItem('stock')) || [];
+
+      const codigo = document.getElementById(`codigo-${index}`).value.trim();
+      const rubro = document.getElementById(`rubro-${index}`).value.trim();
+      const subrubro = document.getElementById(`subrubro-${index}`).value.trim();
+      const nombre = document.getElementById(`nombre-${index}`).value.trim();
+      const color = document.getElementById(`color-${index}`).value.trim();
+      const tamano = document.getElementById(`tamano-${index}`).value.trim();
+      const stockActual = parseInt(document.getElementById(`stockActual-${index}`).value);
+      const stockMinimo = parseInt(document.getElementById(`stockMinimo-${index}`).value);
+
+      if (!codigo || isNaN(stockActual) || isNaN(stockMinimo)) {
+        alert('Completa correctamente los campos obligatorios.');
+        return;
+      }
+
+      // Actualizar el objeto
+      lista[index].codigo = codigo;
+      lista[index].rubro = rubro;
+      lista[index].subrubro = subrubro;
+      lista[index].color = color;
+      lista[index].tamano = tamano;
+      lista[index].stockActual = stockActual;
+      lista[index].stockMinimo = stockMinimo;
+
+      if (lista[index].tipo === 'Producto') {
+        lista[index].producto = nombre;
+      } else {
+        lista[index].insumo = nombre;
+      }
+
+      localStorage.setItem('stock', JSON.stringify(lista));
+      cargarListado();
+    }
+
+    function cancelarEdicion() {
+      cargarListado();
+    }
+
+    function cargarBajoStock() {
+      const tbody = document.getElementById('tablaBajoStock');
+      tbody.innerHTML = '';
+      const lista = JSON.parse(localStorage.getItem('stock')) || [];
+
+      lista.filter(item => item.stockActual < item.stockMinimo)
+        .forEach(item => {
+          const tr = document.createElement('tr');
+          const nombre = item.tipo === 'Producto' ? item.producto : item.insumo;
+          tr.innerHTML = `
+            <td>${item.tipo}</td>
+            <td>${item.codigo}</td>
+            <td>${nombre}</td>
+            <td>${item.stockActual}</td>
+            <td>${item.stockMinimo}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+    }
+
+    // Función para registrar movimiento y actualizar stock
+    function registrarMovimiento(e) {
+      e.preventDefault();
+
+      const fechaISO = document.getElementById('fechaMovimiento').value; // yyyy-mm-dd
+      if (!fechaISO) {
+        mostrarMensajeMovimiento('Por favor, ingrese una fecha válida.', true);
+        return;
+      }
+      const [year, month, day] = fechaISO.split('-');
+      const fecha = `${day}/${month}/${year}`;
+
+      const motivo = document.getElementById('motivoMovimiento').value;
+      const codigo = document.getElementById('codigoMovimiento').value.trim();
+      const cantidad = parseInt(document.getElementById('cantidadMovimiento').value);
+
+      if (!motivo) {
+        mostrarMensajeMovimiento('Por favor, seleccione un motivo.', true);
+        return;
+      }
+      if (!codigo) {
+        mostrarMensajeMovimiento('Por favor, ingrese un código válido.', true);
+        return;
+      }
+      if (isNaN(cantidad) || cantidad === 0) {
+        mostrarMensajeMovimiento('Ingrese una cantidad distinta de cero.', true);
+        return;
+      }
+
+      let lista = JSON.parse(localStorage.getItem('stock')) || [];
+      const index = lista.findIndex(item => item.codigo === codigo);
+
+      if (index === -1) {
+        mostrarMensajeMovimiento('No se encontró producto o insumo con ese código.', true);
+        return;
+      }
+
+      // Actualizar stock según motivo
+      if (motivo === 'Ingreso por compra' || motivo === 'Devolución') {
+        lista[index].stockActual += cantidad;
+      } else if (motivo === 'Venta' || motivo === 'Ajuste de stock') {
+        lista[index].stockActual -= cantidad;
+      } else if (motivo === 'Otros') {
+        // Asumimos cantidad positiva = ingreso, negativa = salida (esto puede ajustarse)
+        lista[index].stockActual += cantidad;
+      }
+
+      if (lista[index].stockActual < 0) {
+        mostrarMensajeMovimiento('El stock no puede quedar negativo.', true);
+        return;
+      }
+
+      // Guardar movimientos (si querés almacenar movimientos, lo podés hacer aquí)
+      // Por ahora solo actualizamos el stock
+
+      localStorage.setItem('stock', JSON.stringify(lista));
+
+      mostrarMensajeMovimiento('Movimiento registrado y stock actualizado correctamente.', false);
+      e.target.reset();
+
+      // Si está visible el listado, actualizarlo
+      if (document.getElementById('listado-stock').classList.contains('active')) {
+        cargarListado();
+      }
+      if (document.getElementById('bajo-stock').classList.contains('active')) {
+        cargarBajoStock();
+      }
+    }
+
+    function mostrarMensajeMovimiento(msg, esError) {
+      const p = document.getElementById('mensajeMovimiento');
+      p.textContent = msg;
+      p.style.color = esError ? 'red' : 'green';
+    }
+
+    // Inicializar subrubros con el valor predeterminado
+    actualizarSubrubros();
+
+  </script>
+</body>
+</html>

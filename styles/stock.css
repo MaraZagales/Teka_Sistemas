@@ -1,0 +1,118 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  background-color: #444;
+}
+nav button {
+  background: none;
+  border: none;
+  color: white;
+  padding: 15px;
+  font-size: 16px;
+  cursor: pointer;
+}
+nav button:hover, nav button.active {
+  background-color: #666;
+}
+section {
+  display: none;
+  padding: 20px;
+}
+section.active {
+  display: block;
+}
+form input, form select, form textarea {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  margin-top: 10px;
+}
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+th {
+  background-color: #333;
+  color: white;
+}
+
+header {
+  background-color: #333;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  position: relative;
+  height: 60px; /* altura para un solo nivel */
+}
+
+header button {
+  position: absolute;
+  top: 15px;
+  padding: 8px 12px;
+  background-color: #1abc9c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+header button:first-of-type {
+  left: 20px; /* botón Volver a la izquierda */
+}
+
+header button.btnCerrarSesion {
+  right: 20px; /* botón Cerrar sesión a la derecha */
+  left: auto;
+}
+form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+h2 {
+  text-align: center;
+}
+
+.btn-imprimir {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+}
+
+.selector-tipo {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.selector-tipo .btnTipo {
+  background: none;
+  border: none;
+  color: white;
+  background-color: #444;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 0 5px;
+  border-radius: 5px;
+}
+
+.selector-tipo .btnTipo:hover,
+.selector-tipo .btnTipo.active {
+  background-color: #666;
+}

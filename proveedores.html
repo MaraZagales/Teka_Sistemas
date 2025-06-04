@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Proveedores</title>
+  <link rel="stylesheet" href="styles/proveedores.css">
+</head>
+<body>
+  <header>
+    <button onclick="window.location.href='index.html'">⬅ Volver</button>
+    <button onclick="location.href='login.html'" class="btnCerrarSesion">Cerrar sesión</button>
+    <h1>Gestión de Proveedores</h1>
+  </header>
+  
+  <nav>
+    <button onclick="mostrarSeccion('proveedor')" class="active">➕ Proveedor</button>
+    <button onclick="mostrarSeccion('catalogo')">📦 Catálogo</button>
+    <button onclick="mostrarSeccion('factura')">🧾 Factura</button>
+    <button onclick="mostrarSeccion('listarProveedores')">📋 Listar Proveedores</button>
+    <button onclick="mostrarSeccion('listarFacturas')">📆 Listar Facturas</button>
+  </nav>
+
+  <section id="proveedor" class="active">
+    <h2>Carga de nuevo Proveedor</h2>
+    <form id="formProveedor">
+      <input type="text" id="nombreProveedor" placeholder="Nombre del proveedor" required>
+      <input type="text" id="cuit" placeholder="CUIT" required>
+      <select id="rubro" required>
+        <option value="">Seleccione un rubro</option>
+        <option value="Madera">Madera</option>
+        <option value="Herrajes">Herrajes</option>
+        <option value="Pinturas y Adhesivos">Pinturas y Adhesivos</option>
+        <option value="Tapicería">Tapicería</option>
+        <option value="Embalaje">Embalaje</option>
+        <option value="Alimentos">Alimentos</option>
+        <option value="Tecnología">Tecnología</option>
+        <option value="Textil">Textil</option>
+        <option value="Servicios">Servicios</option>
+      </select>
+      
+      <input type="text" id="telefono" placeholder="Teléfono" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="text" id="direccion" placeholder="Dirección" required>
+      
+      <select id="localidad" placeholder="Localidad" required>
+        <option value="" disabled selected>Localidad</option>
+        <option value="Alta Gracia">Alta Gracia</option>
+        <option value="Arroyito">Arroyito</option>
+        <option value="Capital">Capital</option>
+        <option value="Colonia Caroya">Colonia Caroya</option>
+        <option value="Cosquín">Cosquín</option>
+        <option value="Cruz del Eje">Cruz del Eje</option>
+        <option value="Deán Funes">Deán Funes</option>
+        <option value="Jesús María">Jesús María</option>
+        <option value="La Falda">La Falda</option>
+        <option value="Laboulaye">Laboulaye</option>
+        <option value="Mina Clavero">Mina Clavero</option>
+        <option value="Río Cuarto">Río Cuarto</option>
+        <option value="Río Tercero">Río Tercero</option>
+        <option value="San Francisco">San Francisco</option>
+        <option value="Villa Allende">Villa Allende</option>
+        <option value="Villa Carlos Paz">Villa Carlos Paz</option>
+        <option value="Villa Dolores">Villa Dolores</option>
+        <option value="Villa María">Villa María</option>
+      </select>
+
+      <input type="text" id="aliasCbu" placeholder="Alias/CBU" required>
+      <select id="tipoIva" required>
+        <option value="" disabled selected>Tipo de IVA</option>
+        <option value="Responsable Inscripto">Responsable Inscripto</option>
+        <option value="Monotributo">Monotributo</option>
+        <option value="Exento">Exento</option>
+      </select>
+      <select id="estado">
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+      <button type="submit">Registrar Proveedor</button>
+    </form>
+  </section>
+
+  <section id="catalogo">
+    <h2>Carga de Catálogo</h2>
+    <form id="formCatalogo">
+      <input type="text" id="catalogoProveedor" placeholder="Nombre del proveedor" required>
+      <input type="text" id="descripcionCatalogo" placeholder="Descripción del catálogo">
+      <input type="url" id="enlaceCatalogo" placeholder="Enlace al catálogo (opcional)">
+      <input type="file" id="archivoCatalogo">
+      <button type="submit">Subir Catálogo</button>
+    </form>
+  </section>
+
+  <section id="factura">
+    <h2>Carga de Factura</h2>
+    <form id="formFactura">
+      <input type="date" id="fechaFactura" required>
+      <select id="proveedorFactura" required>
+        <option value="" disabled selected>Seleccionar proveedor</option>
+      </select>    
+      <input type="text" id="numeroFactura" placeholder="N° de Factura" required>
+      <input type="text" id="monto" placeholder="Monto" required>
+      <textarea id="concepto" placeholder="Concepto"></textarea>
+      <textarea id="observaciones" placeholder="Observaciones"></textarea>
+      <button type="submit">Registrar Factura</button>
+    </form>
+  </section>
+
+  <section id="listarProveedores">
+    <h2>Listado de Proveedores</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>CUIT</th>
+          <th>Rubro</th>
+          <th>Teléfono</th>
+          <th>Email</th>
+          <th>Dirección</th>
+          <th>Localidad</th>
+          <th>Alias/CBU</th>
+          <th>Tipo IVA</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tablaProveedores"></tbody>
+    </table>
+  </section>
+
+  <section id="listarFacturas">
+    <h2>Listado de Facturas por Fecha</h2>
+    <form id="formFiltro">
+      <label>Desde:</label>
+      <input type="date" id="desde">
+      <label>Hasta:</label>
+      <input type="date" id="hasta">
+      <button type="submit">Filtrar</button>
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>N° Factura</th>
+          <th>Proveedor</th>
+          <th>Monto</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tablaFacturas"></tbody>
+    </table>
+  </section>
+
+  <script>
+    let proveedores = [
+      {nombre:"Maderas Nahuel SRL", cuit:"10-01-01", rubro:"Madera", telefono:"(351) 423-4567", email:"", direccion:"Córdoba Capital", localidad:"Capital", aliasCbu:"pierna.mouse.ardilla", tipoIva:"Responsable Inscripto", estado:"Activo"},
+      {nombre:"Maderas Sucre", cuit:"10-01-02", rubro:"Madera", telefono:"(351) 484-6384", email:"", direccion:"Córdoba Capital", localidad:"Capital", aliasCbu:"23423432", tipoIva:"Responsable Inscripto", estado:"Activo"},
+      {nombre:"Maderas Colón", cuit:"10-01-03", rubro:"Madera", telefono:"(351) 484-3986", email:"", direccion:"Av. Colón 6795, Córdoba", localidad:"Capital", aliasCbu:"54325235", tipoIva:"Responsable Inscripto", estado:"Activo"},
+      {nombre:"Maderas Mocona", cuit:"10-01-04", rubro:"Madera", telefono:"(351) 494-8100", email:"", direccion:"Ruta 5 km 4, Córdoba", localidad:"Capital", aliasCbu:"jabon.lupa.arbol", tipoIva:"Responsable Inscripto", estado:"Activo"},
+      {nombre:"Herracenter", cuit:"11-01-01", rubro:"Herrajes", telefono:"(351) 152-593032", email:"", direccion:"Asturias 2824, Córdoba", localidad:"Capital", aliasCbu:"taxi.mp32", tipoIva:"Responsable Inscripto", estado:"Activo"},
+      {nombre:"Herrajes Córdoba", cuit:"11-01-02", rubro:"Herrajes", telefono:"(351) 123-4567", email:"", direccion:"Córdoba Capital", localidad:"Capital", aliasCbu:"hijo.brasil.carpincho", tipoIva:"Responsable Inscripto", estado:"Activo"},
+      {nombre:"VS Herrajes", cuit:"11-01-03", rubro:"Herrajes", telefono:"(351) 234-5678", email:"", direccion:"Córdoba Capital", localidad:"Capital", aliasCbu:"324234311", tipoIva:"Responsable Inscripto", estado:"Activo"},
+      {nombre:"Malkoni", cuit:"11-01-04", rubro:"Herrajes", telefono:"(351) 471-2345", email:"", direccion:"República de Siria 473, Córdoba", localidad:"Capital", aliasCbu:"moneda.trabajo.cuadro", tipoIva:"Responsable Inscripto", estado:"Activo"},
+      {nombre:"Micam-P", cuit:"12-01-01", rubro:"Pinturas y Adhesivos", telefono:"(03543) 453-506", email:"", direccion:"Matacos 1883, Río Tercero", localidad:"Río Tercero", aliasCbu:"sarten.jesus.araña", tipoIva:"Responsable Inscripto", estado:"Activo"},
+      {nombre:"Plascon", cuit:"12-01-02", rubro:"Pinturas y Adhesivos", telefono:"(03543) 453-508", email:"", direccion:"Av. Marconi 2075, Río Tercero", localidad:"Río Tercero", aliasCbu:"234234", tipoIva:"Responsable Inscripto", estado:"Activo"}
+    ];
+
+    let facturas = [
+      {fecha: "2025-05-01", proveedor: "Maderas Nahuel SRL", numero: "F0001", monto: 25000, concepto: "Compra de madera pino", observaciones: ""},
+      {fecha: "2025-05-10", proveedor: "Herracenter", numero: "F0002", monto: 15000, concepto: "Compra de herrajes varios", observaciones: ""},
+      {fecha: "2025-05-15", proveedor: "Plascon", numero: "F0003", monto: 18000, concepto: "Compra de pintura látex", observaciones: ""},
+      {fecha: "2025-05-20", proveedor: "Maderas Sucre", numero: "F0004", monto: 22000, concepto: "Compra de madera cedro", observaciones: ""}
+    ];
+
+  
+    function mostrarSeccion(seccion) {
+      document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(seccion).classList.add('active');
+      
+      if(seccion === 'listarProveedores') {
+        cargarProveedoresTabla();
+      }
+      if(seccion === 'factura') {
+        cargarProveedoresCombo();
+      }
+      if(seccion === 'listarFacturas') {
+        cargarFacturasTabla();
+      }
+    }
+
+    
+    function cargarProveedoresTabla() {
+      const tbody = document.getElementById('tablaProveedores');
+      tbody.innerHTML = '';
+      proveedores.forEach((p, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${p.nombre}</td>
+          <td>${p.cuit}</td>
+          <td>${p.rubro}</td>
+          <td>${p.telefono}</td>
+          <td>${p.email}</td>
+          <td>${p.direccion}</td>
+          <td>${p.localidad}</td>
+          <td>${p.aliasCbu}</td>
+          <td>${p.tipoIva}</td>
+          <td>${p.estado}</td>
+          <td><button onclick="cambiarEstadoProveedor(${index})">${p.estado === 'Activo' ? 'Inactivar' : 'Activar'}</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    
+    function cambiarEstadoProveedor(index) {
+      proveedores[index].estado = proveedores[index].estado === 'Activo' ? 'Inactivo' : 'Activo';
+      cargarProveedoresTabla();
+    }
+
+
+    function cargarProveedoresCombo() {
+      const select = document.getElementById('proveedorFactura');
+      select.innerHTML = '<option value="" disabled selected>Seleccionar proveedor</option>';
+      proveedores.forEach(p => {
+        if(p.estado === 'Activo') {
+          const option = document.createElement('option');
+          option.value = p.nombre;
+          option.textContent = p.nombre;
+          select.appendChild(option);
+        }
+      });
+    }
+
+    function cargarFacturasTabla(filtroDesde, filtroHasta) {
+      const tbody = document.getElementById('tablaFacturas');
+      tbody.innerHTML = '';
+      let facturasFiltradas = facturas;
+
+      if(filtroDesde) {
+        facturasFiltradas = facturasFiltradas.filter(f => f.fecha >= filtroDesde);
+      }
+      if(filtroHasta) {
+        facturasFiltradas = facturasFiltradas.filter(f => f.fecha <= filtroHasta);
+      }
+
+      facturasFiltradas.forEach((f, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${f.fecha}</td>
+          <td>${f.numero}</td>
+          <td>${f.proveedor}</td>
+          <td>${f.monto}</td>
+          <td>
+            <button onclick="imprimirFactura(${index})">Imprimir</button>
+            <button onclick="editarFactura(${index})">Editar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('formProveedor').addEventListener('submit', e => {
+      e.preventDefault();
+      const nuevoProveedor = {
+        nombre: document.getElementById('nombreProveedor').value,
+        cuit: document.getElementById('cuit').value,
+        rubro: document.getElementById('rubro').value,
+        telefono: document.getElementById('telefono').value,
+        email: document.getElementById('email').value,
+        direccion: document.getElementById('direccion').value,
+        localidad: document.getElementById('localidad').value,
+        aliasCbu: document.getElementById('aliasCbu').value,
+        tipoIva: document.getElementById('tipoIva').value,
+        estado: document.getElementById('estado').value,
+      };
+      proveedores.push(nuevoProveedor);
+      alert('Proveedor agregado con éxito');
+      e.target.reset();
+    });
+
+  
+    document.getElementById('formFactura').addEventListener('submit', e => {
+      e.preventDefault();
+      const nuevaFactura = {
+        fecha: document.getElementById('fechaFactura').value,
+        proveedor: document.getElementById('proveedorFactura').value,
+        numero: document.getElementById('numeroFactura').value,
+        monto: parseFloat(document.getElementById('monto').value),
+        concepto: document.getElementById('concepto').value,
+        observaciones: document.getElementById('observaciones').value
+      };
+      facturas.push(nuevaFactura);
+      alert('Factura agregada con éxito');
+      e.target.reset();
+    });
+
+    document.getElementById('formFiltro').addEventListener('submit', e => {
+      e.preventDefault();
+      const desde = document.getElementById('desde').value;
+      const hasta = document.getElementById('hasta').value;
+      cargarFacturasTabla(desde, hasta);
+    });
+
+ 
+    function imprimirFactura(index) {
+      const f = facturas[index];
+      const ventana = window.open('', '_blank');
+      ventana.document.write(`
+        <html>
+        <head><title>Factura ${f.numero}</title></head>
+        <body>
+          <h1>Factura N°: ${f.numero}</h1>
+          <p><strong>Fecha:</strong> ${f.fecha}</p>
+          <p><strong>Proveedor:</strong> ${f.proveedor}</p>
+          <p><strong>Monto:</strong> $${f.monto}</p>
+          <p><strong>Concepto:</strong> ${f.concepto}</p>
+          <p><strong>Observaciones:</strong> ${f.observaciones}</p>
+          <button onclick="window.print()">Imprimir</button>
+        </body>
+        </html>
+      `);
+      ventana.document.close();
+    }
+
+    
+    function editarFactura(index) {
+      const f = facturas[index];
+      const nuevaFecha = prompt('Modificar fecha (YYYY-MM-DD):', f.fecha);
+      if(!nuevaFecha) return;
+      const nuevoNumero = prompt('Modificar número de factura:', f.numero);
+      if(!nuevoNumero) return;
+      const nuevoProveedor = prompt('Modificar proveedor:', f.proveedor);
+      if(!nuevoProveedor) return;
+      const nuevoMonto = prompt('Modificar monto:', f.monto);
+      if(!nuevoMonto || isNaN(nuevoMonto)) return alert('Monto inválido');
+      const nuevoConcepto = prompt('Modificar concepto:', f.concepto);
+      if(nuevoConcepto === null) return;
+      const nuevasObservaciones = prompt('Modificar observaciones:', f.observaciones);
+      if(nuevasObservaciones === null) return;
+
+      facturas[index] = {
+        fecha: nuevaFecha,
+        numero: nuevoNumero,
+        proveedor: nuevoProveedor,
+        monto: parseFloat(nuevoMonto),
+        concepto: nuevoConcepto,
+        observaciones: nuevasObservaciones
+      };
+
+      alert('Factura modificada con éxito');
+      cargarFacturasTabla();
+    }
+
+    
+    window.onload = () => {
+      mostrarSeccion('proveedor');
+      cargarProveedoresCombo();
+      cargarFacturasTabla();
+    };
+  </script>
+</body>
+</html>
